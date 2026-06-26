@@ -1,6 +1,6 @@
 // CreateContext: contexto para el carrito. UseContext en componentes que lo necesiten.
 import { useState, createContext, useContext} from 'react'
-import { Product } from '../data/products'
+import type { Product } from '../data/products'
 
 
 // Tipado del contexto
@@ -82,3 +82,4 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
    </CarritoContext.Provider>
  )
 }
+export default CarritoProvider
