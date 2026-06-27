@@ -1,85 +1,102 @@
-// CreateContext: contexto para el carrito. UseContext en componentes que lo necesiten.
-import { useState, createContext, useContext} from 'react'
+// CartContext.tsx — Context API para el carrito de compras
+import { useState, createContext, useContext } from 'react'
+import type { ReactNode } from 'react'
 import type { Product } from '../data/products'
 
 
-// Tipado del contexto
-interface CarritoItem extends Product {
- quantity: number
+// Tipo de cada ítem del carrito (producto + cantidad)
+export interface CarritoItem extends Product {
+  quantity: number
 }
 
 
-//Genero una interface del carrito para tipar el contexto, con las funciones que va a tener el carrito y el estado del mismo
+// Interfaz del contexto: estado + funciones disponibles para los componentes
 interface CarritoContextType {
- carrito: CarritoItem[]
- addToCart: (product: Product, quantity: number) => void
- removeItem: (id: number) => void
- emptyCart: () => void
- getItemQuantity: () => number
- getTotalPrice: () => number
+  carrito: CarritoItem[]
+  addToCart: (product: Product, quantity: number) => void
+  removeFromCart: (id: number) => void
+  clearCart: () => void
+  getTotalCart: () => number
+  getTotalPrice: () => number
+  getItemSubtotal: (id: number) => number
 }
 
 
+// Creación del contexto con valor inicial undefined (requiere estar dentro del Provider)
 const CarritoContext = createContext<CarritoContextType | undefined>(undefined)
 
 
-// Hook para utilizar el carrito
+// Hook personalizado para consumir el contexto con validación
 export const useCarritoContext = (): CarritoContextType => {
- const context = useContext(CarritoContext)
- if (!context) throw new Error('useCarritoContext debe usarse dentro de CarritoProvider')
- return context
+  const context = useContext(CarritoContext)
+  if (!context) throw new Error('useCarritoContext debe usarse dentro de CarritoProvider')
+  return context
 }
 
 
-export const CarritoProvider = ({ children }: { children: React.ReactNode }) => {
- // Estado del carrito
- const [carrito, setCarrito] = useState<CarritoItem[]>([])
+// Provider del carrito: contiene el estado y las funciones de negocio
+export const CarritoProvider = ({ children }: { children: ReactNode }) => {
+  const [carrito, setCarrito] = useState<CarritoItem[]>([])
 
 
- // Verifica si un producto ya está en el carrito
- const isInCart = (id: number): boolean => carrito.some(p => p.id === id)
+  // Verifica si un producto ya está en el carrito
+  const isInCart = (id: number): boolean => carrito.some(p => p.id === id)
 
 
- // Agrega o actualiza la cantidad de un producto en el carrito
- const addToCart = (product: Product, quantity: number): void => {
-   if (quantity > product.stock) {    // Validación de stock primero
-       return console.warn('No hay stock suficiente')
-   }
+  // Agrega un producto al carrito o actualiza su cantidad si ya existe
+  const addToCart = (product: Product, quantity: number): void => {
+    if (quantity > product.stock) {
+      console.warn('No hay stock suficiente')
+      return
+    }
+
+    const index = carrito.findIndex(p => p.id === product.id)
+
+    if (isInCart(product.id)) {
+      // Si ya existe, actualiza la cantidad
+      const updated = [...carrito]
+      updated[index] = { ...updated[index], quantity }
+      setCarrito(updated)
+    } else {
+      // Si no existe, lo agrega con la cantidad indicada
+      setCarrito(prev => [...prev, { ...product, quantity }])
+    }
+  }
 
 
-   const idProd = carrito.findIndex(p => p.id === product.id) // Busca el índice del producto
+  // Elimina un producto del carrito por su id
+  const removeFromCart = (id: number): void =>
+    setCarrito(prev => prev.filter(p => p.id !== id))
 
 
-   if (isInCart(product.id)) {        // Si ya está en carrito, actualizo la cantidad
-       const aux = [...carrito]
-       aux[idProd] = { ...aux[idProd], quantity }
-       setCarrito(aux)
-   } else {                           // Si no está, lo agrego con el operador spread
-       setCarrito(aux => [...aux, { ...product, quantity }])
-   }
+  // Vacía el carrito completo
+  const clearCart = (): void => setCarrito([])
+
+
+  // Retorna la cantidad total de unidades en el carrito
+  const getTotalCart = (): number =>
+    carrito.reduce((acum, p) => acum + p.quantity, 0)
+
+
+  // Retorna el precio total de todos los ítems del carrito
+  const getTotalPrice = (): number =>
+    carrito.reduce((acum, p) => acum + p.precio * p.quantity, 0)
+
+
+  // Retorna el subtotal de un ítem específico (precio × cantidad)
+  const getItemSubtotal = (id: number): number => {
+    const item = carrito.find(p => p.id === id)
+    return item ? item.precio * item.quantity : 0
+  }
+
+
+  return (
+    <CarritoContext.Provider
+      value={{ carrito, addToCart, removeFromCart, clearCart, getTotalCart, getTotalPrice, getItemSubtotal }}
+    >
+      {children}
+    </CarritoContext.Provider>
+  )
 }
 
-
- // Elimina un producto del carrito por id
- const removeItem = (id: number): void => setCarrito(aux => aux.filter(p => p.id !== id))
-
-
- // Vacía el carrito
- const emptyCart = (): void => setCarrito([])
-
-
- // Suma la cantidad de todos los productos en el carrito
- const getItemQuantity = (): number => carrito.reduce((acum, p) => acum + p.quantity, 0)
-
-
- // Suma el precio total de todos los productos en el carrito
- const getTotalPrice = (): number => carrito.reduce((acum, p) => acum + p.precio * p.quantity, 0)
-
-
- return (
-   <CarritoContext.Provider value={{ carrito, addToCart, removeItem, emptyCart, getItemQuantity, getTotalPrice }}>
-     {children}
-   </CarritoContext.Provider>
- )
-}
 export default CarritoProvider
