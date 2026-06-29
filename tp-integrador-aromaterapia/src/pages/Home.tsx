@@ -1,5 +1,6 @@
 // Home.tsx — Página principal de la tienda
 import ProductList from '../components/ProductList'
+import Contact from '../components/Contact'
 
 const Home = () => {
   return (
@@ -46,6 +47,9 @@ const Home = () => {
 
       {/* Catálogo de productos */}
       <ProductList />
+
+      {/* Formulario de contacto */}
+      <Contact />
     </main>
   )
 }
