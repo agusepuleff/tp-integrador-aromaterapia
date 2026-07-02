@@ -1,0 +1,29 @@
+.hero {
+  background: linear-gradient(135deg, #b7cd7f 0%, #a89cc8 100%);
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  text-align: center;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-dark);
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+  font-family: 'Poppins', sans-serif;
+  color: var(--color-text-dark);
+}
+
+.hero p {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-lg);
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
+.hero .btn {
+  font-family: 'Poppins', sans-serif;
+}
