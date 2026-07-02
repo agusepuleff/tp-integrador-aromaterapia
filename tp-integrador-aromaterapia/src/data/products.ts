@@ -1,0 +1,104 @@
+// Interface que define la estructura de un producto
+export interface Product {
+  id: number
+  nombre: string
+  precio: number
+  stock: number
+  categoria: string
+  img: string
+  descripcion?: string
+}
+
+
+export const products: Product[] = [
+  {
+    id: 1,
+    nombre: 'Combo 6 Aceites Esenciales A Elección',
+    precio: 33600,
+    categoria: 'Bienestar y Aromaterapia',
+    stock: 15,
+    descripcion: 'Elegí 6 aceites esenciales puros de nuestra colección completa.',
+    img: 'https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRf2fdRv3vpAPsccbs31Au8MdfS9EX0YFysHMwG6B-E0wrEVHRb4pz2CsukUPHrQXh9KeU4XaBQEHMRAxO-2Hv5UQJ79fQPk4ys5Jzhe18_Hl6RW4ha6r91EQ',
+  },
+  {
+    id: 2,
+    nombre: 'Limón — Aceite Esencial Puro',
+    precio: 32500,
+    categoria: 'Aceites Individuales',
+    stock: 8,
+    descripcion: 'Aceite esencial de limón 100% puro. Energizante y refrescante.',
+    img: 'https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQX10_GHMDSEugKxQWk-BIUnpUx8P-W8CQL-BHlo_A9YZqez8FBvEzL-Kn0hcXWsFX_OU6XwvwGkQEd9Xox61ryyU-mG0MAJbHr39FfxerOeZXDTwntxZN6nVlR',
+  },
+  {
+    id: 3,
+    nombre: 'Cliganic Set de Aromaterapia — 6 Aceites Esenciales',
+    precio: 33250,
+    categoria: 'Sets de Regalo',
+    stock: 22,
+    descripcion: 'Kit inicial ideal con los 6 aceites más populares de aromaterapia.',
+    img: 'https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQotOF6WJ_FFDi2H-wuK0MeuzrADgNyOrqOr1dMpZvbz6HUn8qJOrA2aMdfgy8Vyb05AgTXU5suEmLxTzxCHAHvzS0-yV79',
+  },
+  {
+    id: 4,
+    nombre: 'Bruma Sensorial 3 Fases',
+    precio: 8500,
+    categoria: 'Brumas Aromáticas',
+    stock: 12,
+    descripcion: 'Bruma relajante con aceites esenciales de lavanda y manzanilla.',
+    img: 'data:image/jpeg;base64,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',
+  },
+  {
+    id: 5,
+    nombre: 'Gotas Aromáticas para Objetos',
+    precio: 6200,
+    categoria: 'Aromaterapia Ambiental',
+    stock: 20,
+    descripcion: 'Gotas concentradas para perfumar ropa, almohadas y objetos del hogar.',
+    img: 'data:image/jpeg;base64,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',
+  },
+  {
+    id: 6,
+    nombre: 'Disco Aromático Recargable',
+    precio: 7800,
+    categoria: 'Difusores Portátiles',
+    stock: 15,
+    descripcion: 'Difusor portátil recargable, perfecto para llevar a cualquier lugar.',
+    img: 'https://http2.mlstatic.com/D_NQ_NP_2X_914533-CBT108816824818_032026-F.webp',
+  },
+  {
+    id: 7,
+    nombre: 'Sales de Baño Relajantes',
+    precio: 5016,
+    categoria: 'Cuidado Personal',
+    stock: 15,
+    descripcion: 'Sales minerales enriquecidas con aceites esenciales de lavanda y rosa.',
+    img: 'https://acdn-us.mitiendanube.com/stores/002/363/785/products/345c4ec7-ce8c-45fd-99b2-8efba956ed0a-2d1cc2516ee41134c317428523201927-480-0.webp',
+  },
+  {
+    id: 8,
+    nombre: 'Vela Aromática — Jazmín Primavera',
+    precio: 9800,
+    categoria: 'Velas Aromáticas',
+    stock: 35,
+    descripcion: 'Vela de soja con fragancia de jazmín natural. Duración 45 horas.',
+    img: 'https://www.dulcesaromas.es/cdn/shop/files/5_bb5d1eaa-1ea3-4e1c-8baf-6e38fa9fffb6.png?v=1774526387&width=3840',
+  },
+  {
+    id: 9,
+    nombre: 'Kit Lavanda Patagónica con Minidifusor',
+    precio: 39516,
+    categoria: 'Sets de Regalo',
+    stock: 35,
+    descripcion: 'Kit completo con aceite esencial de lavanda patagónica y difusor portátil USB.',
+    img: 'https://acdn-us.mitiendanube.com/stores/001/755/068/products/esencias-solubles4-73aafce74c505df98517778996631294-480-0.webp',
+  },
+  {
+    id: 10,
+    nombre: 'Aceite Esencial de Menta Pura 10ml',
+    precio: 6749,
+    categoria: 'Aceites Individuales',
+    stock: 20,
+    descripcion: 'Aceite esencial de menta piperita 100% puro. Refrescante y estimulante.',
+    img: 'https://http2.mlstatic.com/D_NQ_NP_678124-MLA105118912447_012026-O.webp',
+  },
+]
