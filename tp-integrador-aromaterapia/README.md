@@ -17,7 +17,7 @@ La aplicación presenta productos de aromaterapia mediante componentes reutiliza
 1. Clonar el repositorio:
 
 ```bash
-git clone <URL_DEL_REPO>
+git clone https://github.com/Eliaspaz777/tp-integrador-aromaterapia.git
 ```
 
 2. Ingresar al proyecto:
@@ -86,9 +86,9 @@ src/
 
 ## 👥 Equipo de trabajo
 
-* agusepuleff
-* Eliaspaz777
-* [Tu nombre]
+* Agustina Epulef
+* Elias Paz 
+* Ezequiel Martinez
 
 ---
 
