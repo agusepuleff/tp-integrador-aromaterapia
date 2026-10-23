@@ -1,32 +1,37 @@
-// App.tsx — Layout principal: maneja Navbar, contenido y Footer
-// El estado `cartOpen` controla la visibilidad del drawer del carrito
+// App.tsx — Layout principal y rutas de la aplicación
 import { useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import { CarritoProvider } from './context/CartContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Cart from './components/Cart'
 import Home from './pages/Home'
+import Login from './pages/Login'
+import Register from './pages/Register'
 
 const App = () => {
   const [cartOpen, setCartOpen] = useState<boolean>(false)
 
-  const openCart = (): void => setCartOpen(true)
-  const closeCart = (): void => setCartOpen(false)
-
   return (
-    <CarritoProvider>
-      {/* Navbar con callback para abrir el drawer */}
-      <Navbar onCartOpen={openCart} />
+    <BrowserRouter>
+      {/* AuthProvider va afuera: el carrito depende de si hay sesión */}
+      <AuthProvider>
+        <CarritoProvider>
+          <Navbar onCartOpen={() => setCartOpen(true)} />
 
-      {/* Página principal */}
-      <Home />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Register />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
 
-      {/* Drawer del carrito (portal lateral) */}
-      <Cart isOpen={cartOpen} onClose={closeCart} />
-
-      {/* Footer */}
-      <Footer />
-    </CarritoProvider>
+          <Cart isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+          <Footer />
+        </CarritoProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
