@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useCarritoContext } from '../context/CartContext'
-import type { Product } from '../data/products'
+import type { Product } from '../types'
 
 interface ProductCardProps {
   product: Product

@@ -1,7 +1,7 @@
 // CartContext.tsx — Context API para el carrito de compras
 import { useState, createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
-import type { Product } from '../data/products'
+import type { Product } from '../types'
 
 
 // Tipo de cada ítem del carrito (producto + cantidad)
