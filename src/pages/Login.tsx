@@ -1,26 +1,26 @@
-
+// Login.tsx — Inicio de sesión
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { formatApiError } from '../api/client'
+import { ApiError, formatApiError } from '../api/client'
 
 const Login = () => {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Si el usuario llegó acá desde una ruta protegida, vuelve a esa pantalla después de ingresar
+  const destino = (location.state as { from?: string } | null)?.from ?? '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
+  // Si ya hay sesión iniciada, no tiene sentido mostrar el formulario
   if (isAuthenticated) {
-    return (
-      <main className="auth-page">
-        <p>Ya iniciaste sesión.</p>
-        <Link to="/">Ir al inicio</Link>
-      </main>
-    )
+    return <Navigate to={destino} replace />
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -30,9 +30,13 @@ const Login = () => {
 
     try {
       await login(email.trim(), password)
-      navigate('/', { replace: true })
+      navigate(destino, { replace: true })
     } catch (err: unknown) {
-      setError(formatApiError(err))
+      if (err instanceof ApiError && err.status === 401) {
+        setError('Email o contraseña incorrectos.')
+      } else {
+        setError(formatApiError(err))
+      }
     } finally {
       setEnviando(false)
     }

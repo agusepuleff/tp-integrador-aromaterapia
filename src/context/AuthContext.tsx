@@ -1,17 +1,8 @@
-
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+// AuthContext.tsx — Estado de autenticación (usuario logueado) para toda la app
+import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import {
-  iniciarSesion,
-  registrarUsuario,
-  getPerfil,
-} from '../api/auth'
+import { clearTokens, getAccessToken, saveTokens } from '../api/client'
+import { getPerfil, iniciarSesion, registrarUsuario } from '../api/auth'
 import type { Perfil } from '../api/auth'
 
 interface AuthContextType {
@@ -35,46 +26,44 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<Perfil | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Si hay un token guardado, hay que verificarlo con el backend antes de decidir si hay sesión
+  const [loading, setLoading] = useState<boolean>(() => getAccessToken() !== null)
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('access')
-    localStorage.removeItem('refresh')
-    setUser(null)
-  }, [])
-
-  const cargarPerfil = useCallback(async () => {
-    try {
-      const perfil = await getPerfil()
-      setUser(perfil)
-    } catch {
-      localStorage.removeItem('access')
-      localStorage.removeItem('refresh')
-      setUser(null)
-    }
-  }, [])
-
+  // Al abrir la app: si hay token guardado, se recupera el perfil del usuario
   useEffect(() => {
-    const iniciar = async () => {
-      if (localStorage.getItem('access')) {
-        await cargarPerfil()
-      }
-      setLoading(false)
+    if (!getAccessToken()) return
+    let cancelado = false
+
+    getPerfil()
+      .then((perfil) => {
+        if (!cancelado) setUser(perfil)
+      })
+      .catch(() => clearTokens())
+      .finally(() => {
+        if (!cancelado) setLoading(false)
+      })
+
+    return () => {
+      cancelado = true
     }
+  }, [])
 
-    void iniciar()
-  }, [cargarPerfil])
+  // El cliente HTTP avisa con este evento cuando no pudo renovar el token
+  useEffect(() => {
+    const onLogout = (): void => setUser(null)
+    window.addEventListener('auth:logout', onLogout)
+    return () => window.removeEventListener('auth:logout', onLogout)
+  }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     const tokens = await iniciarSesion(email, password)
+    saveTokens(tokens.access, tokens.refresh)
 
-    localStorage.setItem('access', tokens.access)
-    localStorage.setItem('refresh', tokens.refresh)
-
-    await cargarPerfil()
-
-    if (!localStorage.getItem('access')) {
-      throw new Error('No se pudo cargar el perfil del usuario.')
+    try {
+      setUser(await getPerfil())
+    } catch (error) {
+      clearTokens()
+      throw error
     }
   }
 
@@ -82,8 +71,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     email: string,
     password: string,
     passwordConfirm: string,
-  ) => {
+  ): Promise<void> => {
     await registrarUsuario(email, password, passwordConfirm)
+    await login(email, password) // después de registrarse, inicia sesión automáticamente
+  }
+
+  const logout = (): void => {
+    clearTokens()
+    setUser(null)
   }
 
   return (

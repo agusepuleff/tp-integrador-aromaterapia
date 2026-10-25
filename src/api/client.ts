@@ -1,10 +1,12 @@
-
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined)
   ?.replace(/\/+$/, '')
 
 if (!API_URL) {
   console.error('Falta definir VITE_API_URL en el archivo .env')
 }
+
+const ACCESS_KEY = 'access'
+const REFRESH_KEY = 'refresh'
 
 export class ApiError extends Error {
   status: number
@@ -22,18 +24,54 @@ export class ApiError extends Error {
   }
 }
 
+// ---------- Manejo de tokens (localStorage) ----------
 export const getAccessToken = (): string | null =>
-  localStorage.getItem('access')
+  localStorage.getItem(ACCESS_KEY)
 
-type ApiFetchOptions = RequestInit & {
-  auth?: boolean
+const getRefreshToken = (): string | null =>
+  localStorage.getItem(REFRESH_KEY)
+
+export const saveTokens = (access: string, refresh?: string): void => {
+  localStorage.setItem(ACCESS_KEY, access)
+  if (refresh) localStorage.setItem(REFRESH_KEY, refresh)
 }
 
-export async function apiFetch<T>(
+export const clearTokens = (): void => {
+  localStorage.removeItem(ACCESS_KEY)
+  localStorage.removeItem(REFRESH_KEY)
+}
+
+// Pide un access token nuevo usando el refresh token (sin pedir la contraseña)
+async function refrescarAccessToken(): Promise<boolean> {
+  const refresh = getRefreshToken()
+  if (!refresh) return false
+
+  try {
+    const response = await fetch(`${API_URL ?? ''}/api/auth/token/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh }),
+    })
+    if (!response.ok) return false
+
+    const data = await response.json()
+    saveTokens(data.access, data.refresh)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// ---------- Peticiones ----------
+type ApiFetchOptions = RequestInit & {
+  auth?: boolean // false = no enviar el token (endpoints públicos)
+}
+
+async function enviar(
   path: string,
-  options: ApiFetchOptions = {},
-): Promise<T> {
-  const { auth = true, ...requestOptions } = options
+  requestOptions: RequestInit,
+  auth: boolean,
+): Promise<Response> {
   const headers = new Headers(requestOptions.headers)
 
   if (requestOptions.body != null) {
@@ -42,18 +80,13 @@ export async function apiFetch<T>(
 
   if (auth) {
     const token = getAccessToken()
-
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`)
-    }
+    if (token) headers.set('Authorization', `Bearer ${token}`)
   } else {
     headers.delete('Authorization')
   }
 
-  let response: Response
-
   try {
-    response = await fetch(`${API_URL ?? ''}${path}`, {
+    return await fetch(`${API_URL ?? ''}${path}`, {
       ...requestOptions,
       headers,
     })
@@ -62,6 +95,26 @@ export async function apiFetch<T>(
       0,
       'No se pudo conectar con el servidor. Intentá de nuevo en unos segundos.',
     )
+  }
+}
+
+export async function apiFetch<T>(
+  path: string,
+  options: ApiFetchOptions = {},
+): Promise<T> {
+  const { auth = true, ...requestOptions } = options
+
+  let response = await enviar(path, requestOptions, auth)
+
+  // Si el access token venció, se intenta renovar una vez y se repite la petición
+  if (response.status === 401 && auth && getRefreshToken()) {
+    if (await refrescarAccessToken()) {
+      response = await enviar(path, requestOptions, auth)
+    } else {
+      // El refresh token también venció: se cierra la sesión
+      clearTokens()
+      window.dispatchEvent(new Event('auth:logout'))
+    }
   }
 
   if (response.status === 204) {
@@ -73,9 +126,7 @@ export async function apiFetch<T>(
   if (!response.ok) {
     throw new ApiError(
       response.status,
-      data?.message ??
-        data?.detail ??
-        'Ocurrió un error inesperado.',
+      data?.message ?? data?.detail ?? 'Ocurrió un error inesperado.',
       data?.details,
     )
   }
@@ -107,4 +158,3 @@ export const formatApiError = (err: unknown): string => {
 
   return 'Ocurrió un error inesperado. Intentá nuevamente.'
 }
-

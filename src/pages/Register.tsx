@@ -1,4 +1,4 @@
-
+// Register.tsx — Registro de usuarios
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -31,9 +31,11 @@ const Register = () => {
     setEnviando(true)
 
     try {
+      // Crea la cuenta e inicia sesión automáticamente
       await register(email.trim(), password, passwordConfirm)
-      navigate('/login', { replace: true })
+      navigate('/', { replace: true })
     } catch (err: unknown) {
+      // El backend devuelve los motivos (email ya usado, contraseña débil, etc.)
       setError(formatApiError(err))
     } finally {
       setEnviando(false)
