@@ -1,7 +1,9 @@
-// ProductCard.tsx — Tarjeta individual de producto con nuevo diseño
-
+// ProductCard.tsx — Tarjeta individual de producto
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useCarritoContext } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
+import { formatApiError } from '../api/client'
 import type { Product } from '../types'
 
 interface ProductCardProps {
@@ -18,30 +20,42 @@ const formatPrice = (precio: number): string =>
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCarritoContext()
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+
   const [qty, setQty] = useState<number>(1)
   const [added, setAdded] = useState<boolean>(false)
+  const [enviando, setEnviando] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleAdd = (): void => {
-    addToCart(product, qty)
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1500)
+  const handleAdd = async (): Promise<void> => {
+    // El carrito pertenece a un usuario: sin sesión, se lo manda a ingresar
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/' } })
+      return
+    }
+
+    setError(null)
+    setEnviando(true)
+    try {
+      await addToCart(product, qty)
+      setAdded(true)
+      setTimeout(() => setAdded(false), 1500)
+    } catch (err) {
+      // Por ejemplo: "Stock insuficiente para ..."
+      setError(formatApiError(err))
+    } finally {
+      setEnviando(false)
+    }
   }
 
-  const handleQtyChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    const value = Math.max(
-      1,
-      Math.min(Number(e.target.value), product.stock)
-    )
+  const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = Math.max(1, Math.min(Number(e.target.value), product.stock))
     setQty(value)
   }
 
   return (
-    <article
-      className="product-card"
-      aria-label={`Producto: ${product.nombre}`}
-    >
+    <article className="product-card" aria-label={`Producto: ${product.nombre}`}>
       {/* Imagen */}
       <div className="product-card__img-wrap">
         <img
@@ -52,29 +66,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
         />
 
         {/* Insignia de categoría */}
-        <span className="product-card__category-badge">
-          {product.categoria}
-        </span>
+        <span className="product-card__category-badge">{product.categoria}</span>
       </div>
 
       {/* Cuerpo de la tarjeta */}
       <div className="product-card__body">
-        {/* Nombre del producto */}
-        <h3 className="product-card__name">
-          {product.nombre}
-        </h3>
+        <h3 className="product-card__name">{product.nombre}</h3>
 
-        {/* Precio destacado */}
-        <p className="product-card__price">
-          {formatPrice(product.precio)}
-        </p>
+        <p className="product-card__price">{formatPrice(product.precio)}</p>
 
         {/* Stock disponible */}
-        <p
-          className={`product-card__stock ${
-            product.stock <= 3 ? 'low' : ''
-          }`}
-        >
+        <p className={`product-card__stock ${product.stock <= 3 ? 'low' : ''}`}>
           {product.stock === 0
             ? '✗ Sin stock'
             : product.stock <= 3
@@ -82,11 +84,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
               : `✓ Stock disponible (${product.stock})`}
         </p>
 
-        {/* Descripción del producto */}
         {product.descripcion && (
-          <p className="product-card__description">
-            {product.descripcion}
-          </p>
+          <p className="product-card__description">{product.descripcion}</p>
         )}
 
         {/* Acciones: cantidad + botón agregar */}
@@ -105,16 +104,20 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
           <button
             id={`add-btn-product-${product.id}`}
-            className={`product-card__btn ${
-              added ? 'added' : ''
-            }`}
+            className={`product-card__btn ${added ? 'added' : ''}`}
             onClick={handleAdd}
-            disabled={product.stock === 0}
+            disabled={product.stock === 0 || enviando}
             aria-label={`Agregar ${product.nombre} al carrito`}
           >
-            {added ? '✓ Agregado' : 'Agregar al carrito'}
+            {added ? '✓ Agregado' : enviando ? 'Agregando…' : 'Agregar al carrito'}
           </button>
         </div>
+
+        {error && (
+          <p className="product-card__error" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     </article>
   )
