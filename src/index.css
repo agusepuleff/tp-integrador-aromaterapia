@@ -1842,3 +1842,91 @@ a {
 .product-filters input[type='number'] {
   width: 130px;
 }
+
+/* ── Navbar: acciones a la derecha, botones de sesión verdes con movimiento ── */
+.navbar__actions {
+  justify-self: end;
+  margin-left: 0;
+  gap: 0.6rem;
+}
+
+.navbar__auth {
+  gap: 0.6rem;
+}
+
+.navbar__auth-link,
+.navbar__auth-btn {
+  background-color: var(--color-btn-primary);
+  color: var(--color-text-light);
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-subtle);
+  transition: var(--transition-fast);
+}
+
+.navbar__auth-link:hover,
+.navbar__auth-btn:hover {
+  background-color: var(--color-btn-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.navbar__auth-link:active,
+.navbar__auth-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .navbar__actions {
+    gap: 0.4rem;
+  }
+  .navbar__auth {
+    gap: 0.4rem;
+  }
+  .navbar__auth-link,
+  .navbar__auth-btn {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  .navbar__user {
+    display: none;
+  }
+}
+
+/* ── Filtros: todo en una sola fila (Filtrar y Limpiar al lado de Ordenar por) ── */
+.product-filters {
+  max-width: 1300px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.product-filters input[type='search'] {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.product-filters select {
+  flex: 0 1 190px;
+  min-width: 0;
+}
+
+.product-filters input[type='number'] {
+  flex: 0 1 110px;
+  width: auto;
+  min-width: 0;
+}
+
+.product-filters button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* En pantallas chicas vuelven a acomodarse en varias filas */
+@media (max-width: 1100px) {
+  .product-filters {
+    flex-wrap: wrap;
+  }
+}
