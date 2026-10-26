@@ -9,6 +9,8 @@ import Cart from './components/Cart'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Pedidos from './pages/Pedidos'
+import ProtectedRoute from './components/ProtectedRoute'
 
 const App = () => {
   const [cartOpen, setCartOpen] = useState<boolean>(false)
@@ -24,6 +26,14 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
+            <Route
+              path="/pedidos"
+              element={
+                <ProtectedRoute>
+                  <Pedidos />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 

@@ -83,6 +83,9 @@ const Navbar = ({ onCartOpen }: NavbarProps) => {
           <div className="navbar__auth">
             {isAuthenticated ? (
               <>
+                <Link to="/pedidos" className="navbar__auth-link">
+                  Mis pedidos
+                </Link>
                 <span className="navbar__user" title={user?.email}>
                   {user?.email}
                 </span>
