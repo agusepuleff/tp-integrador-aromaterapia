@@ -35,14 +35,13 @@ const ProductList = () => {
   // Productos: se vuelven a pedir cuando cambian los filtros o la página
   useEffect(() => {
     let cancelado = false
-    setLoading(true)
-    setError(null)
 
     getProductos({ ...filtros, page })
       .then((data) => {
         if (cancelado) return
         setProductos(data.results)
         setTotal(data.count)
+        setError(null)
       })
       .catch((e: Error) => {
         if (!cancelado) setError(e.message)
@@ -58,11 +57,15 @@ const ProductList = () => {
 
   const aplicarFiltros = (e: React.FormEvent): void => {
     e.preventDefault()
+    setLoading(true)
+    setError(null)
     setPage(1)
     setFiltros(draft)
   }
 
   const limpiarFiltros = (): void => {
+    setLoading(true)
+    setError(null)
     setDraft(FILTROS_VACIOS)
     setFiltros(FILTROS_VACIOS)
     setPage(1)
@@ -153,9 +156,16 @@ const ProductList = () => {
       {error && !loading && (
         <p className="product-status product-status--error">
           {error}{' '}
-          <button type="button" onClick={() => setFiltros({ ...filtros })}>
-            Reintentar
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true)
+                setError(null)
+                setFiltros({ ...filtros })
+              }}
+            >
+              Reintentar
+            </button>
         </p>
       )}
 
@@ -177,19 +187,31 @@ const ProductList = () => {
       {/* Paginación */}
       {!loading && !error && totalPaginas > 1 && (
         <nav className="product-pagination" aria-label="Paginación">
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            ← Anterior
-          </button>
-          <span>
-            Página {page} de {totalPaginas}
-          </span>
-          <button disabled={page >= totalPaginas} onClick={() => setPage(page + 1)}>
-            Siguiente →
-          </button>
-        </nav>
+            <button
+              disabled={page <= 1}
+              onClick={() => {
+                setLoading(true)
+                setPage(page - 1)
+              }}
+            >
+              ← Anterior
+            </button>
+            <span>
+              Página {page} de {totalPaginas}
+            </span>
+              <button
+                disabled={page >= totalPaginas}
+                onClick={() => {
+                  setLoading(true)
+                  setPage(page + 1)
+                }}
+              >
+                Siguiente →
+              </button>
+            </nav>
       )}
-    </section>
-  )
+          </section>
+          )
 }
 
-export default ProductList
+          export default ProductList

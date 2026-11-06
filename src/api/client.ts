@@ -41,25 +41,38 @@ export const clearTokens = (): void => {
   localStorage.removeItem(REFRESH_KEY)
 }
 
+// Mutex para evitar race conditions si ocurren múltiples 401 concurrentes
+let refreshPromise: Promise<boolean> | null = null
+
 // Pide un access token nuevo usando el refresh token (sin pedir la contraseña)
 async function refrescarAccessToken(): Promise<boolean> {
   const refresh = getRefreshToken()
   if (!refresh) return false
 
-  try {
-    const response = await fetch(`${API_URL ?? ''}/api/auth/token/refresh/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh }),
-    })
-    if (!response.ok) return false
+    if (refreshPromise) {
+      return refreshPromise
+    }
 
-    const data = await response.json()
-    saveTokens(data.access, data.refresh)
-    return true
-  } catch {
-    return false
-  }
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${API_URL ?? ''}/api/auth/token/refresh/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh }),
+      })
+      if (!response.ok) return false
+
+      const data = await response.json()
+      saveTokens(data.access, data.refresh)
+      return true
+    } catch {
+      return false
+    } finally {
+      refreshPromise = null
+    }
+  })()
+
+  return refreshPromise
 }
 
 // ---------- Peticiones ----------

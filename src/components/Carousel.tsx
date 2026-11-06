@@ -1,13 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const IMAGES = [
+  "/imagenes/imagen-carrusel1.jpg",
+  "/imagenes/imagen-carrusel2.jpg",
+  "/imagenes/imagen-carrusel3.jpg",
+];
 
 const Carousel = () => {
-  const images = [
-    "/imagenes/imagen-carrusel1.jpg",
-    "/imagenes/imagen-carrusel2.jpg",
-    "/imagenes/imagen-carrusel3.jpg",
-  ];
-
   const [current, setCurrent] = useState(0);
+
+  const nextSlide = useCallback(() => {
+    setCurrent((prev) => (prev + 1) % IMAGES.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrent((prev) => (prev - 1 + IMAGES.length) % IMAGES.length);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -15,29 +23,22 @@ const Carousel = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [current]);
+}, [nextSlide]);
 
-  const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % images.length);
-  };
-
-  const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  return (
-    <section className="carousel">
+return (
+    <section className="carousel" aria-label="Carrusel principal">
       <div className="carousel__images-wrapper">
-        {images.map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt={`Imagen ${index + 1}`}
-            className={`carousel__image ${
-              index === current ? "carousel__image--active" : ""
-            }`}
-          />
-        ))}
+          {
+            IMAGES.map((image, index) => (
+              <img
+                key={image}
+                src={image}
+                alt={`Imagen destacada ${index + 1}`}
+                className={`carousel__image ${index === current ? "carousel__image--active" : ""
+                  }`}
+              />
+            ))
+          }
       </div>
 
       <div className="carousel__overlay">
@@ -60,34 +61,41 @@ const Carousel = () => {
 
       {/* Flecha izquierda */}
       <button
+        type="button"
         className="carousel__arrow carousel__arrow--left"
         onClick={prevSlide}
+        aria-label="Imagen anterior"
       >
         ❮
       </button>
 
       {/* Flecha derecha */}
       <button
+        type="button"
         className="carousel__arrow carousel__arrow--right"
         onClick={nextSlide}
+        aria-label="Siguiente imagen"
       >
         ❯
       </button>
 
       {/* Puntitos */}
       <div className="carousel__dots">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            className={`carousel__dot ${
-              index === current ? "carousel__dot--active" : ""
-            }`}
-            onClick={() => setCurrent(index)}
-          />
-        ))}
+          {
+            IMAGES.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                className={`carousel__dot ${index === current ? "carousel__dot--active" : ""
+                  }`}
+                onClick={() => setCurrent(index)}
+                aria-label={`Ir a la imagen ${index + 1}`}
+              />
+            ))
+          }
       </div>
     </section>
-  );
+    );
 };
 
-export default Carousel;
+    export default Carousel;

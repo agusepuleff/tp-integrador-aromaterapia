@@ -1,11 +1,35 @@
 import { useState } from 'react'
+import { enviarMensajeContacto } from '../api/contacto'
+import { formatApiError } from '../api/client'
 
 const Contact = () => {
+  const [nombre, setNombre] = useState<string>('')
+  const [correo, setCorreo] = useState<string>('')
+  const [mensaje, setMensaje] = useState<string>('')
+  const [enviando, setEnviando] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState<boolean>(false)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setSubmitted(true)
+    setError(null)
+    setEnviando(true)
+
+    try {
+      await enviarMensajeContacto({
+        nombre: nombre.trim(),
+        correo: correo.trim(),
+        mensaje: mensaje.trim(),
+      })
+      setSubmitted(true)
+      setNombre('')
+      setCorreo('')
+      setMensaje('')
+    } catch (err: unknown) {
+      setError(formatApiError(err))
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -19,7 +43,7 @@ const Contact = () => {
             ¿Tenés alguna duda sobre nuestros aceites esenciales o difusores?
             Escribinos y te responderemos lo antes posible.
           </p>
-          
+
           <div className="contact-details">
             <div className="contact-detail-item">
               <span className="contact-detail-icon" aria-hidden="true">📧</span>
@@ -54,9 +78,9 @@ const Contact = () => {
               <p className="contact-success__text">
                 Gracias por comunicarte con nosotros. Nos pondremos en contacto a la brevedad.
               </p>
-              <button 
+              <button
                 type="button"
-                className="contact-success__btn" 
+                className="contact-success__btn"
                 onClick={() => setSubmitted(false)}
               >
                 Enviar otro mensaje
@@ -72,6 +96,9 @@ const Contact = () => {
                   required
                   placeholder="Tu nombre y apellido"
                   className="form-input"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  disabled={enviando}
                 />
               </div>
 
@@ -83,6 +110,9 @@ const Contact = () => {
                   required
                   placeholder="ejemplo@correo.com"
                   className="form-input"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  disabled={enviando}
                 />
               </div>
 
@@ -94,11 +124,20 @@ const Contact = () => {
                   rows={4}
                   placeholder="Escribí tu consulta acá..."
                   className="form-textarea"
+                  value={mensaje}
+                  onChange={(e) => setMensaje(e.target.value)}
+                  disabled={enviando}
                 />
               </div>
 
-              <button type="submit" className="contact-submit-btn">
-                Enviar mensaje
+              {error && (
+                <p className="auth-error" role="alert" style={{ marginBottom: '1rem' }}>
+                  {error}
+                </p>
+              )}
+
+              <button type="submit" className="contact-submit-btn" disabled={enviando}>
+                {enviando ? 'Enviando mensaje…' : 'Enviar mensaje'}
               </button>
             </form>
           )}
