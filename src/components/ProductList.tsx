@@ -88,62 +88,83 @@ const ProductList = () => {
         </p>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros organizados con clases claras y diseño responsive */}
       <form className="product-filters" onSubmit={aplicarFiltros}>
-        <input
-          type="search"
-          placeholder="Buscar por nombre…"
-          value={draft.search}
-          onChange={(e) => setDraft({ ...draft, search: e.target.value })}
-          aria-label="Buscar por nombre"
-        />
+        <div className="product-filters__group product-filters__group--search">
+          <input
+            type="search"
+            className="product-filters__input product-filters__input--search"
+            placeholder="Buscar por nombre…"
+            value={draft.search}
+            onChange={(e) => setDraft({ ...draft, search: e.target.value })}
+            aria-label="Buscar por nombre"
+          />
+        </div>
 
-        <select
-          value={draft.categoria}
-          onChange={(e) => setDraft({ ...draft, categoria: e.target.value })}
-          aria-label="Filtrar por categoría"
-        >
-          <option value="">Todas las categorías</option>
-          {categorias.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nombre}
-            </option>
-          ))}
-        </select>
+        <div className="product-filters__group product-filters__group--category">
+          <select
+            className="product-filters__select"
+            value={draft.categoria}
+            onChange={(e) => setDraft({ ...draft, categoria: e.target.value })}
+            aria-label="Filtrar por categoría"
+          >
+            <option value="">Todas las categorías</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="number"
-          min={0}
-          placeholder="Precio mín."
-          value={draft.precioMin}
-          onChange={(e) => setDraft({ ...draft, precioMin: e.target.value })}
-          aria-label="Precio mínimo"
-        />
+        <div className="product-filters__group product-filters__group--prices">
+          <input
+            type="number"
+            min={0}
+            className="product-filters__input product-filters__input--price"
+            placeholder="Precio mín."
+            value={draft.precioMin}
+            onChange={(e) => setDraft({ ...draft, precioMin: e.target.value })}
+            aria-label="Precio mínimo"
+          />
 
-        <input
-          type="number"
-          min={0}
-          placeholder="Precio máx."
-          value={draft.precioMax}
-          onChange={(e) => setDraft({ ...draft, precioMax: e.target.value })}
-          aria-label="Precio máximo"
-        />
+          <input
+            type="number"
+            min={0}
+            className="product-filters__input product-filters__input--price"
+            placeholder="Precio máx."
+            value={draft.precioMax}
+            onChange={(e) => setDraft({ ...draft, precioMax: e.target.value })}
+            aria-label="Precio máximo"
+          />
+        </div>
 
-        <select
-          value={draft.ordering}
-          onChange={(e) => setDraft({ ...draft, ordering: e.target.value })}
-          aria-label="Ordenar por"
-        >
-          <option value="">Ordenar por…</option>
-          <option value="precio">Precio: menor a mayor</option>
-          <option value="-precio">Precio: mayor a menor</option>
-          <option value="nombre">Nombre: A–Z</option>
-        </select>
+        <div className="product-filters__group product-filters__group--order">
+          <select
+            className="product-filters__select"
+            value={draft.ordering}
+            onChange={(e) => setDraft({ ...draft, ordering: e.target.value })}
+            aria-label="Ordenar por"
+          >
+            <option value="">Ordenar por…</option>
+            <option value="precio">Precio: menor a mayor</option>
+            <option value="-precio">Precio: mayor a menor</option>
+            <option value="nombre">Nombre: A–Z</option>
+          </select>
+        </div>
 
-        <button type="submit">Filtrar</button>
-        <button type="button" onClick={limpiarFiltros}>
-          Limpiar
-        </button>
+        <div className="product-filters__actions">
+          <button type="submit" className="product-filters__btn product-filters__btn--submit">
+            Filtrar
+          </button>
+          <button
+            type="button"
+            className="product-filters__btn product-filters__btn--clear"
+            onClick={limpiarFiltros}
+          >
+            Limpiar
+          </button>
+        </div>
       </form>
 
       {/* Estados */}

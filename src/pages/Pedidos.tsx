@@ -46,61 +46,95 @@ const Pedidos = () => {
 
   return (
     <main className="orders-page">
-      <h1>Mis pedidos</h1>
+      <div className="orders-page__header">
+        <Link to="/" className="orders-page__back-link">
+          ← Volver a la tienda
+        </Link>
+        <span className="orders-page__tag">🌿 Tu historial de compras</span>
+        <h1 className="orders-page__title">Mis Pedidos</h1>
+        <p className="orders-page__subtitle">
+          Consultá el estado y detalle de cada uno de tus pedidos realizados.
+        </p>
+      </div>
 
       {mensajeExito && (
-        <p className="orders-success" role="status">
-          ✓ {mensajeExito}
-        </p>
+        <div className="orders-success" role="status">
+          <span className="orders-success__icon" aria-hidden="true">✓</span>
+          <div className="orders-success__content">
+            <p className="orders-success__title">¡Compra realizada con éxito!</p>
+            <p className="orders-success__desc">{mensajeExito}</p>
+          </div>
+        </div>
       )}
 
-      {loading && <p className="product-status">Cargando tus pedidos…</p>}
+      {loading && (
+        <div className="product-status">
+          <p>Cargando tus pedidos…</p>
+        </div>
+      )}
 
       {error && !loading && (
-        <p className="product-status product-status--error">{error}</p>
+        <div className="product-status product-status--error">
+          <p>{error}</p>
+          <Link to="/" className="orders-empty__btn" style={{ marginTop: '1rem', display: 'inline-block' }}>
+            Volver a la tienda
+          </Link>
+        </div>
       )}
 
       {!loading && !error && pedidos.length === 0 && (
-        <p className="product-status">
-          Todavía no realizaste ningún pedido. <Link to="/">Ir a la tienda</Link>
-        </p>
+        <div className="orders-empty">
+          <span className="orders-empty__icon" aria-hidden="true">🛍️</span>
+          <h2 className="orders-empty__title">Todavía no realizaste ningún pedido</h2>
+          <p className="orders-empty__desc">
+            Explorá nuestra variedad de productos botánicos y aceites esenciales.
+          </p>
+          <Link to="/" className="orders-empty__btn">
+            Ir al catálogo de productos →
+          </Link>
+        </div>
       )}
 
-      <div className="orders-list">
-        {pedidos.map((pedido) => (
-          <article key={pedido.id} className="order-card" aria-label={`Pedido ${pedido.id}`}>
-            <header className="order-card__header">
-              <div>
-                <h2>Pedido #{pedido.id}</h2>
-                <p className="order-card__date">{formatFecha(pedido.creado_en)}</p>
-              </div>
-              <span className={`order-status order-status--${pedido.estado}`}>
-                {pedido.estado_display}
-              </span>
-            </header>
+      {!loading && pedidos.length > 0 && (
+        <div className="orders-list">
+          {pedidos.map((pedido) => (
+            <article key={pedido.id} className="order-card" aria-label={`Pedido ${pedido.id}`}>
+              <header className="order-card__header">
+                <div>
+                  <h2 className="order-card__id">Pedido #{pedido.id}</h2>
+                  <p className="order-card__date">{formatFecha(pedido.creado_en)}</p>
+                </div>
+                <span className={`order-status order-status--${pedido.estado}`}>
+                  {pedido.estado_display}
+                </span>
+              </header>
 
-            <ul className="order-card__items">
-              {pedido.items.map((item) => (
-                <li key={item.id}>
-                  <span>
-                    {item.nombre_producto} × {item.cantidad}
-                  </span>
-                  <span>{formatPrice(Number(item.subtotal))}</span>
-                </li>
-              ))}
-            </ul>
+              <ul className="order-card__items">
+                {pedido.items.map((item) => (
+                  <li key={item.id} className="order-card__item">
+                    <span className="order-card__item-name">
+                      {item.nombre_producto} <strong className="order-card__item-qty">× {item.cantidad}</strong>
+                    </span>
+                    <span className="order-card__item-price">{formatPrice(Number(item.subtotal))}</span>
+                  </li>
+                ))}
+              </ul>
 
-            {pedido.direccion_envio && (
-              <p className="order-card__address">📍 {pedido.direccion_envio}</p>
-            )}
+              {pedido.direccion_envio && (
+                <div className="order-card__address">
+                  <span className="order-card__address-icon" aria-hidden="true">📍</span>
+                  <span>{pedido.direccion_envio}</span>
+                </div>
+              )}
 
-            <footer className="order-card__footer">
-              <span>Total</span>
-              <strong>{formatPrice(Number(pedido.total))}</strong>
-            </footer>
-          </article>
-        ))}
-      </div>
+              <footer className="order-card__footer">
+                <span className="order-card__total-label">Total del pedido</span>
+                <strong className="order-card__total-val">{formatPrice(Number(pedido.total))}</strong>
+              </footer>
+            </article>
+          ))}
+        </div>
+      )}
     </main>
   )
 }
